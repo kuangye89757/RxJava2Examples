@@ -37,11 +37,22 @@ import com.nanchen.rxjava2examples.module.rxjava2.operators.item.RxZipActivity;
 import java.util.ArrayList;
 
 /**
- * 操作符Fragment
- *
- * Author: nanchen
- * Email: liushilin520@foxmail.com
- * Date: 2017-06-20  14:55
+ * RxJava 2.x 拥有了新的特性，其依赖于4个基础接口
+ * 
+ *  Publisher  发出一系列的事件 (生产者)
+ *             用的比较多的自然是Flowable --支持背压(流速控制策略)
+ *                  在异步场景中，被观察者发送事件速度远快于观察者的处理速度的情况下，一种告诉上游的被观察者降低发送速度的策略。 
+ *              
+ *  Subscriber 负责和处理这些事件 (消费者)
+ *  
+ *              Observable/ Observer 不支持背压
+ *              Flowable/ Subscriber 支持背压
+ *  
+ *  
+ *  Subscription
+ *  Processor
+ *  
+ *  
  */
 
 public class OperatorsFragment extends CategoryBaseFragment {
@@ -172,6 +183,8 @@ public class OperatorsFragment extends CategoryBaseFragment {
                 break;
             case 27:
                 startActivity(new Intent(getActivity(), RxFlowableActivity.class));
+                break;
+            default:
                 break;
         }
     }

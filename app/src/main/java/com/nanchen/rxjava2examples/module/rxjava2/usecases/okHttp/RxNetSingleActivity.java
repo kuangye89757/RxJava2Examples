@@ -1,8 +1,10 @@
 package com.nanchen.rxjava2examples.module.rxjava2.usecases.okHttp;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.nanchen.rxjava2examples.model.DoubaiInfo;
 import com.nanchen.rxjava2examples.model.MobileAddress;
 import com.nanchen.rxjava2examples.module.rxjava2.operators.item.RxOperatorBaseActivity;
 
@@ -44,11 +46,13 @@ public class RxNetSingleActivity extends RxOperatorBaseActivity {
         return "单一的网络请求";
     }
 
+    @SuppressLint("CheckResult")
     @Override
     protected void doSomething() {
         Observable.create(new ObservableOnSubscribe<Response>() {
             @Override
             public void subscribe(@NonNull ObservableEmitter<Response> e) throws Exception {
+                Log.d(TAG, "ObservableOnSubscribe 网络请求线程:" + Thread.currentThread().getName() + "\n");
                 Builder builder = new Builder()
                         .url("http://api.avatardata.cn/MobilePlace/LookUp?key=ec47b85086be4dc8b5d941f5abd37a4e&mobileNumber=13021671512")
                         .get();
@@ -58,49 +62,104 @@ public class RxNetSingleActivity extends RxOperatorBaseActivity {
                 e.onNext(response);
             }
         }).map(new Function<Response, MobileAddress>() {
-                    @Override
-                    public MobileAddress apply(@NonNull Response response) throws Exception {
-
-                        Log.e(TAG, "map 线程:" + Thread.currentThread().getName() + "\n");
-                        if (response.isSuccessful()) {
-                            ResponseBody body = response.body();
-                            if (body != null) {
-                                Log.e(TAG, "map:转换前:" + response.body());
-                                return new Gson().fromJson(body.string(), MobileAddress.class);
-                            }
+                @Override
+                public MobileAddress apply(@NonNull Response response) throws Exception {
+                    Log.d(TAG, "map 线程:" + Thread.currentThread().getName() + "\n");
+                    if (response.isSuccessful()) {
+                        ResponseBody body = response.body();
+                        if (body != null) {
+                            Log.d(TAG, "map:转换前:" + response.body());
+                            return new Gson().fromJson(body.string(), MobileAddress.class);
                         }
-                        return null;
                     }
-                }).observeOn(AndroidSchedulers.mainThread())
-                .doOnNext(new Consumer<MobileAddress>() {
-                    @Override
-                    public void accept(@NonNull MobileAddress s) throws Exception {
-                        Log.e(TAG, "doOnNext 线程:" + Thread.currentThread().getName() + "\n");
-                        mRxOperatorsText.append("\ndoOnNext 线程:" + Thread.currentThread().getName() + "\n");
-                        Log.e(TAG, "doOnNext: 保存成功：" + s.toString() + "\n");
-                        mRxOperatorsText.append("doOnNext: 保存成功：" + s.toString() + "\n");
-
-                    }
-                }).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<MobileAddress>() {
-                    @Override
-                    public void accept(@NonNull MobileAddress data) throws Exception {
-                        Log.e(TAG, "subscribe 线程:" + Thread.currentThread().getName() + "\n");
-                        mRxOperatorsText.append("\nsubscribe 线程:" + Thread.currentThread().getName() + "\n");
-                        Log.e(TAG, "成功:" + data.toString() + "\n");
-                        mRxOperatorsText.append("成功:" + data.toString() + "\n");
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(@NonNull Throwable throwable) throws Exception {
-                        Log.e(TAG, "subscribe 线程:" + Thread.currentThread().getName() + "\n");
-                        mRxOperatorsText.append("\nsubscribe 线程:" + Thread.currentThread().getName() + "\n");
-
-                        Log.e(TAG, "失败：" + throwable.getMessage() + "\n");
-                        mRxOperatorsText.append("失败：" + throwable.getMessage() + "\n");
-                    }
-                });
+                    return null;
+                }
+        }).observeOn(AndroidSchedulers.mainThread())
+          .doOnNext(new Consumer<MobileAddress>() {
+                @Override
+                public void accept(@NonNull MobileAddress s) throws Exception {
+                    Log.d(TAG, "doOnNext 线程:" + Thread.currentThread().getName() + "\n");
+                    mRxOperatorsText.append("\ndoOnNext 线程:" + Thread.currentThread().getName() + "\n");
+                    Log.d(TAG, "doOnNext: 保存成功：" + s.toString() + "\n");
+                    mRxOperatorsText.append("doOnNext: 保存成功：" + s.toString() + "\n");
+    
+                }
+            }).subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Consumer<MobileAddress>() {
+                @Override
+                public void accept(@NonNull MobileAddress data) throws Exception {
+                    Log.d(TAG, "Consumer 线程:" + Thread.currentThread().getName() + "\n");
+                    mRxOperatorsText.append("\nConsumer 线程:" + Thread.currentThread().getName() + "\n");
+                    Log.d(TAG, "成功:" + data.toString() + "\n");
+                    mRxOperatorsText.append("成功:" + data.toString() + "\n");
+                }
+            }, new Consumer<Throwable>() {
+                @Override
+                public void accept(@NonNull Throwable throwable) throws Exception {
+                    Log.d(TAG, "Consumer Throwable线程:" + Thread.currentThread().getName() + "\n");
+                    mRxOperatorsText.append("\nConsumer Throwable线程:" + Thread.currentThread().getName() + "\n");
+    
+                    Log.d(TAG, "失败：" + throwable.getMessage() + "\n");
+                    mRxOperatorsText.append("失败：" + throwable.getMessage() + "\n");
+                }
+            });
     }
 
+    @SuppressLint("CheckResult")
+    @Override
+    protected void doOtherthing() {
+        Observable.create(new ObservableOnSubscribe<Response>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<Response> e) throws Exception {
+                Log.d(TAG, "ObservableOnSubscribe 网络请求线程:" + Thread.currentThread().getName() + "\n");
+                Builder builder = new Builder()
+                        .url("http://api.douban.com/v2/movie/top250?start=0&count=1")
+                        .get();
+                Request request = builder.build();
+                Call call = new OkHttpClient().newCall(request);
+                Response response = call.execute();
+                e.onNext(response);
+            }
+        }).map(new Function<Response, DoubaiInfo>() {
+            @Override
+            public DoubaiInfo apply(@NonNull Response response) throws Exception {
+                Log.d(TAG, "map 线程:" + Thread.currentThread().getName() + "\n");
+                if (response.isSuccessful()) {
+                    ResponseBody body = response.body();
+                    if (body != null) {
+                        Log.d(TAG, "map:转换前:" + response.body());
+                        return new Gson().fromJson(body.string(), DoubaiInfo.class);
+                    }
+                }
+                return null;
+            }
+        }).observeOn(Schedulers.io()) //影响doOnNext
+        .doOnNext(new Consumer<DoubaiInfo>() {
+                @Override
+                public void accept(@NonNull DoubaiInfo s) throws Exception {
+                    Log.d(TAG, "doOnNext IO存储线程:" + Thread.currentThread().getName() + "\n");
+                    Log.d(TAG, "doOnNext: 保存成功：" + s.toString() + "\n");
+                }
+        }).subscribeOn(Schedulers.io()) //影响ObservableEmitter的subscribe方法 和 map
+        .observeOn(AndroidSchedulers.mainThread()) //影响Consumer
+        .subscribe(new Consumer<DoubaiInfo>() {
+            @Override
+            public void accept(@NonNull DoubaiInfo data) throws Exception {
+                Log.d(TAG, "Consumer 线程:" + Thread.currentThread().getName() + "\n");
+                mRxOperatorsText.append("\nConsumer 线程:" + Thread.currentThread().getName() + "\n");
+                Log.d(TAG, "成功:" + data.toString() + "\n");
+                mRxOperatorsText.append("成功:" + data.toString() + "\n");
+            }
+        }, new Consumer<Throwable>() {
+            @Override
+            public void accept(@NonNull Throwable throwable) throws Exception {
+                Log.d(TAG, "Consumer Throwable线程:" + Thread.currentThread().getName() + "\n");
+                mRxOperatorsText.append("\nConsumer Throwable线程:" + Thread.currentThread().getName() + "\n");
+
+                Log.d(TAG, "失败：" + throwable.getMessage() + "\n");
+                mRxOperatorsText.append("失败：" + throwable.getMessage() + "\n");
+            }
+        });
+    }
 }

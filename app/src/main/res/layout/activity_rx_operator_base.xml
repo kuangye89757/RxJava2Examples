@@ -12,6 +12,13 @@
         style="@style/MyBtnStyle"
         android:text="@string/doSomething"/>
 
+
+    <Button
+        android:layout_marginTop="20dp"
+        android:id="@+id/rx_operators_btn_1"
+        style="@style/MyBtnStyle"
+        android:text="@string/doOtherthing"/>
+    
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">

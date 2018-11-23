@@ -10,6 +10,7 @@
 
     <!--rx-->
     <string name="doSomething">doSomething</string>
+    <string name="doOtherthing">doOtherthing</string>
     <string name="rx_create">create</string>
     <string name="rx_just">just</string>
     <string name="rx_map">map</string>

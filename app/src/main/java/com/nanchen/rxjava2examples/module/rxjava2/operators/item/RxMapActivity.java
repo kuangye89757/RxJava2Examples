@@ -1,5 +1,6 @@
 package com.nanchen.rxjava2examples.module.rxjava2.operators.item;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 import com.nanchen.rxjava2examples.R;
@@ -14,13 +15,8 @@ import io.reactivex.functions.Function;
 
 /**
  * map
- * <p>
- * 基本是RxJava 最简单的操作符了
- * 作用是对上游发送的每一个事件应用一个函数，使得每一个事件都按照指定的函数去变化
- * <p>
- * Author: nanchen
- * Email: liushilin520@foxmail.com
- * Date: 2017-06-20  09:48
+ *    将一个 Observable 对象通过某种关系转换为另一个Observable 对象 (同1.x)
+ *    2.x将1.x中的 Func1 和 Func2 改为 Function 和 BiFunction  
  */
 
 public class RxMapActivity extends RxOperatorBaseActivity {
@@ -31,6 +27,7 @@ public class RxMapActivity extends RxOperatorBaseActivity {
         return getString(R.string.rx_map);
     }
 
+    @SuppressLint("CheckResult")
     @Override
     protected void doSomething() {
         Observable.create(new ObservableOnSubscribe<Integer>() {
@@ -54,4 +51,26 @@ public class RxMapActivity extends RxOperatorBaseActivity {
         });
     }
 
+    @SuppressLint("CheckResult")
+    @Override
+    protected void doOtherthing() {
+        Observable.create(new ObservableOnSubscribe<Integer>() {
+            @Override
+            public void subscribe(ObservableEmitter<Integer> e) throws Exception {
+                e.onNext(1);
+                e.onNext(2);
+                e.onNext(3);
+            }
+        }).map(new Function<Integer, Boolean>() {
+            @Override
+            public Boolean apply(Integer integer) throws Exception {
+                return integer % 2 == 0;
+            }
+        }).subscribe(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) throws Exception {
+                mRxOperatorsText.append("accept : " + aBoolean +"\n");
+            }
+        });
+    }
 }
